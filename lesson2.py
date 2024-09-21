@@ -1,23 +1,30 @@
 import asyncio
-from aiogram.types import Message
+from aiogram.types import Message, FSInputFile
 from aiogram.filters import CommandStart, Command
 from aiogram import Bot, Dispatcher, types, F
 from googletrans import Translator
+from gtts import gTTS
+import os
+import uuid
 
 import random
 
 
-TELEGRAM_BOT_TOKEN = 'TELEGRAM_BOT_TOKEN'
+TELEGRAM_BOT_TOKEN = '7352103454:AAESnRPqmUN7jgghs9Llt07fahbnAJgdHEk'
 bot = Bot(token=TELEGRAM_BOT_TOKEN)
 dp = Dispatcher()
 
 translator = Translator()
 
-@dp.message()
-async def translate_message(message: types.Message):
-    original_text = message.text
-    translated = translator.translate(original_text, src='ru', dest='en')
-    await message.reply(translated.text)
+
+
+@dp.message(Command('video'))
+async def video(message: Message):
+    await bot.send_chat_action(message.chat.id, 'upload_video')
+    video = FSInputFile("video1.mp4")
+    await bot.send_video(message.chat.id, video)
+
+
 
 
 @dp.message(Command('photo'))
@@ -32,7 +39,12 @@ async def react_foto(message: Message):
     list = ['Ничё себе!', 'Как это возможно!','Ух ты!']
     rand_answ = random.choice(list)
     await message.answer(rand_answ)
-    await bot.download(message.photo[-1], destination=f'tmp/{message.photo[-1].file_id}.jpg')
+#    await bot.download(message.photo[-1], destination=f'tmp{message.photo[-1].file_id}.jpg')
+    unique_filename = f"{uuid.uuid4()}.jpg"
+    file_path = os.path.join('photos', unique_filename)
+    await message.reply(f"Фото сохранено как {unique_filename}")
+    await photo.download(destination_file=file_path)
+
 
 @dp.message(F.text == "Привет")
 async def aitext(message: Message):
@@ -41,14 +53,26 @@ async def aitext(message: Message):
 
 @dp.message(Command('help'))
 async def help(message: Message):
-    await message.answer('Основные команды: \n /start \n /help')
+    await message.answer('Основные команды: \n /start \n /help \n /photo \n /video')
 
+
+
+
+@dp.message()
+async def translate_message(message: types.Message):
+    original_text = message.text
+    translated = translator.translate(original_text, src='ru', dest='en')
+    await message.reply(translated.text)
+
+    tts = gTTS(text=translated.text, lang='en')
+    tts.save("voice1.mp3")
+    await bot.send_chat_action(message.chat.id, 'upload_audio')
+    audio = FSInputFile('voice1.mp3')
+    await bot.send_audio(message.chat.id, audio)
 
 @dp.message(CommandStart)
 async def start(message: Message):
         await message.answer('Привет, я бот.')
-
-
 async def main():
     await dp.start_polling(bot)
 
