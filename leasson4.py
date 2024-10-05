@@ -10,7 +10,7 @@ import keybord_bt as kb
 
 
 
-TELEGRAM_BOT_TOKEN = '7352103454:AAESnRPqmUN7jgghs9Llt07fahbnAJgdHEk'
+TELEGRAM_BOT_TOKEN = 'TELEGRAM_BOT_TOKEN'
 bot = Bot(token=TELEGRAM_BOT_TOKEN)
 dp = Dispatcher()
 
